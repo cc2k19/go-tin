@@ -1,7 +1,8 @@
 package main
 
 import (
-	"github.com/cc2k19/go-tin/config"
+	"github.com/ataleksand/go-tin/config"
+	"github.com/ataleksand/go-tin/storage"
 )
 
 func main() {
@@ -13,4 +14,10 @@ func main() {
 	if err := cfg.Validate(); err != nil {
 		panic(err)
 	}
+
+	storage, err := storage.New()
+	if err != nil {
+		panic(err)
+	}
+	defer storage.Close()
 }

@@ -232,11 +232,6 @@
   pruneopts = "UT"
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
-
-[solve-meta]
-  analyzer-name = "dep"
-  analyzer-version = 1
-  input-imports = [
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/spf13/viper",
