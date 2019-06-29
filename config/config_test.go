@@ -18,6 +18,8 @@ var _ = Describe("config", func() {
 
 		BeforeEach(func() {
 			settings = DefaultSettings()
+			settings.Storage.Type = "postgres"
+			settings.Storage.URI = "test_uri"
 		})
 
 		Context("when config is valid", func() {
@@ -35,8 +37,22 @@ var _ = Describe("config", func() {
 			})
 		})
 
+		Context("when storage type is missing", func() {
+			It("returns an error", func() {
+				settings.Storage.Type = ""
+				err := settings.Validate()
+				Expect(err).Should(HaveOccurred())
+			})
+		})
+
+		Context("when storage URI is missing", func() {
+			It("returns an error", func() {
+				settings.Storage.URI = ""
+				err := settings.Validate()
+				Expect(err).Should(HaveOccurred())
+			})
+		})
+
 	})
 
 })
-
-
