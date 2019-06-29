@@ -42,6 +42,13 @@ type Server struct {
 func New(config *Settings, api *web.API) *Server {
 	router := mux.NewRouter().StrictSlash(true)
 
+	for _, controller := range api.Controllers {
+		routes := controller.Routes()
+		for _, route := range routes {
+			router.HandleFunc(route.Endpoint.Path, route.Handler).Methods(route.Endpoint.Method)
+		}
+	}
+
 	return &Server{
 		Router: router,
 		Config: config,

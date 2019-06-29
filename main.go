@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/cc2k19/go-tin/api"
 	"log"
 	"os"
 	"os/signal"
@@ -10,7 +11,6 @@ import (
 	"github.com/cc2k19/go-tin/config"
 	"github.com/cc2k19/go-tin/server"
 	"github.com/cc2k19/go-tin/storage"
-	"github.com/cc2k19/go-tin/web"
 )
 
 func main() {
@@ -36,7 +36,7 @@ func main() {
 	}
 	defer storage.Close()
 
-	api := &web.API{}
+	api := api.New(storage)
 
 	server := server.New(cfg.Server, api)
 	server.Run(ctx, wg)
