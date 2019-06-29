@@ -38,6 +38,20 @@
   pruneopts = "UT"
   revision = "93d53a5ae84d81945eedadfe8f6865530d61d51c"
   version = "v3.5.1"
+  digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
+  name = "github.com/gorilla/context"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+  version = "v1.1.1"
+
+[[projects]]
+  digest = "1:88aa9e326e2bd6045a46e00a922954b3e1a9ac5787109f49ac85366df370e1e5"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "53c1911da2b537f792e7cafcb446b05ffe33b996"
+  version = "v1.6.1"
 
 [[projects]]
   digest = "1:c0d19ab64b32ce9fe5cf4ddceba78d5bc9807f0016db6b1183599da3dcc24d10"
@@ -279,12 +293,16 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+<<<<<<< HEAD
     "github.com/DATA-DOG/go-sqlmock",
     "github.com/cc2k19/go-tin/server",
     "github.com/golang-migrate/migrate",
     "github.com/golang-migrate/migrate/database/postgres",
     "github.com/golang-migrate/migrate/source/file",
     "github.com/lib/pq",
+=======
+    "github.com/gorilla/mux",
+>>>>>>> Server listening and gracefull shutdown
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/spf13/viper",
