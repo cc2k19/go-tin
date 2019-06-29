@@ -2,14 +2,15 @@ package main
 
 import (
 	"context"
-	"github.com/cc2k19/go-tin/config"
-	"github.com/cc2k19/go-tin/server"
-	"github.com/cc2k19/go-tin/storage"
-	"github.com/cc2k19/go-tin/web"
 	"log"
 	"os"
 	"os/signal"
 	"sync"
+
+	"github.com/cc2k19/go-tin/config"
+	"github.com/cc2k19/go-tin/server"
+	"github.com/cc2k19/go-tin/storage"
+	"github.com/cc2k19/go-tin/web"
 )
 
 func main() {
