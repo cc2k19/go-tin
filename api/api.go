@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
+	"github.com/cc2k19/go-tin/api/filters"
 	"github.com/cc2k19/go-tin/api/post"
 	"github.com/cc2k19/go-tin/api/user"
 	"github.com/cc2k19/go-tin/storage"
@@ -10,15 +10,16 @@ import (
 	"net/http"
 )
 
-func New(storage storage.Storage) *web.API {
-	return &web.API{Controllers: []web.Controller{
-		user.NewUsersController(),
-		post.NewPostsController(),
-	}}
-}
-
-func AuthenticateBasic(r *http.Request) error {
-	return fmt.Errorf("pishka")
+func New(repository storage.Repository) *web.API {
+	return &web.API{
+		Controllers: []web.Controller{
+			user.NewUsersController(repository),
+			post.NewPostsController(repository),
+		},
+		Filters: []web.Filter{
+			filters.NewBasicAuthenticationFilter(repository),
+		},
+	}
 }
 
 // ErrorResponse defines an error response payload

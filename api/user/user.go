@@ -1,12 +1,15 @@
 package user
 
 import (
+	"github.com/cc2k19/go-tin/storage"
 	"github.com/cc2k19/go-tin/web"
 	"net/http"
 )
 
-func NewUsersController() *controller {
-	return &controller{}
+func NewUsersController(repository *storage.Repository) *controller {
+	return &controller{
+		repository: repository,
+	}
 }
 
 func (c *controller) Routes() []web.Route {

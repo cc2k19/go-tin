@@ -1,8 +1,12 @@
 package post
 
-import "net/http"
+import (
+	"github.com/cc2k19/go-tin/storage"
+	"net/http"
+)
 
 type controller struct {
+	repository *storage.Repository
 }
 
 func (c *controller) add(wr http.ResponseWriter, r *http.Request) {

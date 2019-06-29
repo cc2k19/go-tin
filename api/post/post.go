@@ -1,12 +1,15 @@
 package post
 
 import (
+	"github.com/cc2k19/go-tin/storage"
 	"github.com/cc2k19/go-tin/web"
 	"net/http"
 )
 
-func NewPostsController() *controller {
-	return &controller{}
+func NewPostsController(repository *storage.Repository) *controller {
+	return &controller{
+		repository: repository,
+	}
 }
 
 func (c *controller) Routes() []web.Route {

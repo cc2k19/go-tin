@@ -44,9 +44,12 @@ func New(config *Settings, api *web.API) *Server {
 	router := mux.NewRouter().StrictSlash(true)
 
 	for _, controller := range api.Controllers {
-		routes := controller.Routes()
-		for _, route := range routes {
-			route.Handler = attachAuthenticationFilter(route.Handler, route.AuthType)
+		for _, route := range controller.Routes() {
+			for _, filter := range api.Filters {
+				if matches(filter, route.Endpoint) {
+					route.Handler = attachFilter(route.Handler, filter)
+				}
+			}
 			router.HandleFunc(route.Endpoint.Path, route.Handler).Methods(route.Endpoint.Method)
 		}
 	}
@@ -96,18 +99,22 @@ func gracefulShutdown(ctx context.Context, server *http.Server, wg *sync.WaitGro
 	}
 }
 
-func attachAuthenticationFilter(h http.HandlerFunc, authType web.AuthType) http.HandlerFunc {
-	switch authType {
-	case web.BasicAuthentication:
-		return func(rw http.ResponseWriter, r *http.Request) {
-			err := api.AuthenticateBasic(r)
-			if err != nil {
-				api.WriteResponse(rw, http.StatusUnauthorized, api.ErrorResponse{Error: err.Error()})
-			} else {
-				h(rw, r)
-			}
+func matches(filter web.Filter, endpoint web.Endpoint) bool {
+	for _, v := range filter.MatchingEndpoints() {
+		if v == endpoint {
+			return true
 		}
-	default:
-		return h
+	}
+	return false
+}
+
+func attachFilter(h http.HandlerFunc, filter web.Filter) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		status, err := filter.Filter(r)
+		if err != nil {
+			api.WriteResponse(rw, status, api.ErrorResponse{Error: err.Error()})
+		} else {
+			h(rw, r)
+		}
 	}
 }
