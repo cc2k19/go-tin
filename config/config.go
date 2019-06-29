@@ -2,6 +2,9 @@ package config
 
 import (
 	"fmt"
+
+	"github.com/cc2k19/go-tin/storage"
+
 	"github.com/cc2k19/go-tin/server"
 	"github.com/spf13/viper"
 )
@@ -20,12 +23,13 @@ type ConfigFile struct {
 
 // Settings is used to setup go-tin
 type Settings struct {
-	Server *server.Settings
+	Storage *storage.Settings
+	Server  *server.Settings
 }
 
 // Validate validates the server settings
 func (s *Settings) Validate() error {
-	validatable := []InputValidator{s.Server}
+	validatable := []InputValidator{s.Server, s.Storage}
 	for _, v := range validatable {
 		if err := v.Validate(); err != nil {
 			return err
@@ -37,7 +41,8 @@ func (s *Settings) Validate() error {
 // DefaultSettings returns the default values for configuring go-tin
 func DefaultSettings() *Settings {
 	return &Settings{
-		Server: server.DefaultSettings(),
+		Server:  server.DefaultSettings(),
+		Storage: storage.DefaultSettings(),
 	}
 }
 
