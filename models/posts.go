@@ -26,7 +26,7 @@ type Post struct {
 	ID      int       `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Title   string    `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Content string    `boil:"content" json:"content" toml:"content" yaml:"content"`
-	Date    time.Time `boil:"date" json:"date" toml:"date" yaml:"date"`
+	Date    time.Time `boil:"date" json:"date,omitempty" toml:"date" yaml:"date"`
 	UserID  int       `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
 
 	R *postR `boil:"-" json:"-" toml:"-" yaml:"-"`

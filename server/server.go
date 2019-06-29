@@ -55,8 +55,8 @@ func (s *Server) Run(ctx context.Context, wg *sync.WaitGroup) {
 	}
 
 	handler := &http.Server{
-		Handler:        s.Router,
-		Addr:           ":" + strconv.Itoa(s.Config.Port),
+		Handler: s.Router,
+		Addr:    ":" + strconv.Itoa(s.Config.Port),
 	}
 
 	startServer(ctx, handler, wg)
