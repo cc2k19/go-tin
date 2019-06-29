@@ -78,10 +78,10 @@ func (r *Repository) DeleteFollowRecord(ctx context.Context, follower string, ta
 
 	followerUser, targetUser := users[0], users[1]
 
-	return targetUser.RemoveTargetUsers(ctx, r.storage.Get(), followerUser)
+	return followerUser.RemoveTargetUsers(ctx, r.storage.Get(), targetUser)
 }
 
-func (r *Repository) GetFollowers(ctx context.Context, username, funcType string) (models.UserSlice, error) {
+func (r *Repository) GetFollowers(ctx context.Context, username string) (models.UserSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Followers")
 	if err != nil {
 		return nil, err
@@ -123,12 +123,12 @@ func (r *Repository) GetTargetsPosts(ctx context.Context, username string) (mode
 		return nil, err
 	}
 
-	ids := make([]int, len(users))
+	ids := make([]interface{}, 0, len(users))
 	for _, u := range users {
 		ids = append(ids, u.ID)
 	}
 
-	return models.Posts(qm.WhereIn("user_id in ?", ids)).All(ctx, r.storage.Get())
+	return models.Posts(qm.WhereIn("user_id in ?", ids...)).All(ctx, r.storage.Get())
 }
 
 func (r *Repository) getOneToMany(ctx context.Context, username, relation string) (models.UserSlice, error) {
@@ -137,14 +137,15 @@ func (r *Repository) getOneToMany(ctx context.Context, username, relation string
 		return nil, err
 	}
 
+	var emptyQueryMods []qm.QueryMod
 	var users models.UserSlice
 	var e error
 
 	switch relation {
-	case "Followers":
-		users, e = user.FollowerUsers(nil).All(ctx, r.storage.Get())
 	case "Targets":
-		users, e = user.TargetUsers(nil).All(ctx, r.storage.Get())
+		users, e = user.TargetUsers(emptyQueryMods...).All(ctx, r.storage.Get())
+	case "Followers":
+		users, e = user.FollowerUsers(emptyQueryMods...).All(ctx, r.storage.Get())
 	}
 
 	if e != nil {

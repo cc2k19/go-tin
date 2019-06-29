@@ -32,7 +32,7 @@ func (c *controller) Routes() []web.Route {
 		},
 		{
 			Endpoint: web.Endpoint{
-				Method: http.MethodPost,
+				Method: http.MethodPut,
 				Path:   web.FollowURL + "/{username}",
 			},
 			AuthType: web.BasicAuthentication,
