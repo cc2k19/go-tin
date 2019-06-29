@@ -28,7 +28,7 @@ func NewRepository(storage Storage) *Repository {
 func (r *Repository) AddUser(ctx context.Context, user []byte) error {
 	u := models.User{}
 	if err := json.Unmarshal(user, &u); err != nil {
-		return fmt.Errorf("could not parse json into user struct")
+		return fmt.Errorf("could not parse json into user struct: %s", err)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)

@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"fmt"
-	"github.com/cc2k19/go-tin/api"
 	"github.com/cc2k19/go-tin/web"
 	"github.com/gorilla/mux"
 	"log"
@@ -112,7 +111,8 @@ func attachFilter(h http.HandlerFunc, filter web.Filter) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		status, err := filter.Filter(r)
 		if err != nil {
-			api.WriteResponse(rw, status, api.ErrorResponse{Error: err.Error()})
+			web.WriteResponse(rw, status, web.ErrorResponse{Error: err.Error()})
+			r.Body.Close()
 		} else {
 			h(rw, r)
 		}

@@ -30,13 +30,15 @@ func main() {
 		panic(err)
 	}
 
-	storage, err := storage.New(cfg.Storage)
+	db, err := storage.New(cfg.Storage)
 	if err != nil {
 		panic(err)
 	}
-	defer storage.Close()
+	defer db.Close()
 
-	api := api.New(storage)
+	repository := storage.NewRepository(db)
+
+	api := api.New(repository)
 
 	server := server.New(cfg.Server, api)
 	server.Run(ctx, wg)

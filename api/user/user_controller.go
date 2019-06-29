@@ -1,8 +1,8 @@
 package user
 
 import (
-	"github.com/cc2k19/go-tin/api"
 	"github.com/cc2k19/go-tin/storage"
+	"github.com/cc2k19/go-tin/web"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,27 +13,25 @@ type controller struct {
 }
 
 func (c *controller) add(wr http.ResponseWriter, r *http.Request) {
+	defer r.Body.Close()
+
 	ctx := r.Context()
 
-	bodyReader, err := r.GetBody()
-	if err != nil {
-		log.Printf("Could not extract body: %s\n", err)
-		api.WriteResponse(wr, http.StatusBadRequest, api.ErrorResponse{Error: err.Error()})
-	}
-	defer bodyReader.Close()
-
-	body, err := ioutil.ReadAll(bodyReader)
+	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
 		log.Printf("Could not extract body: %s\n", err)
-		api.WriteResponse(wr, http.StatusBadRequest, api.ErrorResponse{Error: err.Error()})
+		web.WriteResponse(wr, http.StatusBadRequest, web.ErrorResponse{Error: err.Error()})
+		return
 	}
 
-	users, err := c.repository.AddUser(ctx, body)
+	err = c.repository.AddUser(ctx, body)
 	if err != nil {
 		log.Printf("Persisting user failed: %s\n", err)
+		web.WriteResponse(wr, http.StatusBadRequest, web.ErrorResponse{Error: err.Error()})
+		return
 	}
-	api.WriteResponse(wr, http.StatusBadRequest, users)
+	wr.WriteHeader(http.StatusCreated)
 }
 
 func (c *controller) getByUsername(wr http.ResponseWriter, r *http.Request) {

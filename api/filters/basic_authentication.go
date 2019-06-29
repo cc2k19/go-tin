@@ -3,6 +3,7 @@ package filters
 import (
 	"encoding/base64"
 	"fmt"
+	"github.com/cc2k19/go-tin/storage"
 	"github.com/cc2k19/go-tin/web"
 	"log"
 	"net/http"
@@ -10,10 +11,10 @@ import (
 )
 
 type BasicAuthenticationFilter struct {
-	repository *repository.Repository
+	repository *storage.Repository
 }
 
-func NewBasicAuthenticationFilter(repository *repository.Repository) *BasicAuthenticationFilter {
+func NewBasicAuthenticationFilter(repository *storage.Repository) *BasicAuthenticationFilter {
 	return &BasicAuthenticationFilter{
 		repository: repository,
 	}
