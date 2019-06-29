@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/ataleksand/go-tin/config"
-	"github.com/ataleksand/go-tin/storage"
+	"github.com/cc2k19/go-tin/config"
+	"github.com/cc2k19/go-tin/storage"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 		panic(err)
 	}
 
-	storage, err := storage.New()
+	storage, err := storage.New(cfg.Storage)
 	if err != nil {
 		panic(err)
 	}

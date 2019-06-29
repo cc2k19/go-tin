@@ -19,10 +19,30 @@ var (
 	basepath      = path.Dir(file)
 )
 
-// Config holds all storage configuration settings
-type Config struct {
-	Type string
-	URI  string
+// Settings holds all storage configuration settings
+type Settings struct {
+	Type              string `mapstructure:"type" description:"Type of the storage"`
+	URI               string `mapstructure:"uri" description:"URI of the storage"`
+	SkipSSLValidation bool   `mapstructure:"skip_ssl_validation" description:"whether to skip ssl verification when connecting to the storage"`
+}
+
+func DefaultSettings() *Settings {
+	return &Settings{
+		Type:              "",
+		URI:               "",
+		SkipSSLValidation: false,
+	}
+}
+
+// Validate validates the storage settings
+func (s *Settings) Validate() error {
+	if len(s.Type) == 0 {
+		return fmt.Errorf("validate Settings: StorageType missing")
+	}
+	if len(s.URI) == 0 {
+		return fmt.Errorf("validate Settings: StorageURI missing")
+	}
+	return nil
 }
 
 type Storage interface {
@@ -59,13 +79,17 @@ func (ps *postgresStorage) Close() error {
 }
 
 // New creates a Storage object and updates the database with the latest migrations
-func New() (Storage, error) {
-	db, err := sql.Open("postgres", "postgres://postgres:postgres@localhost:1234/postgres?sslmode=disable")
+func New(s *Settings) (Storage, error) {
+	if s.SkipSSLValidation {
+		s.URI = s.URI + "?sslmode=disable"
+	}
+
+	db, err := sql.Open(s.Type, s.URI)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open db connection: %s", err)
 	}
 
-	err = updateSchema(db, "postgres")
+	err = updateSchema(db, s.Type)
 	if err != nil {
 		return nil, fmt.Errorf("unable to update db schema: %s", err)
 	}
