@@ -2,12 +2,11 @@ BEGIN;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY NOT NULL,
-  username varchar(255) NOT NULL,
+  username varchar(255) NOT NULL UNIQUE,
   password varchar(255) NOT NULL,
-  birth_date date NOT NULL,
-  bio text NOT NULL,
-  hometown varchar(255) NOT NULL,
-  UNIQUE (username)
+  birth_date date,
+  bio text,
+  hometown varchar(255)
 );
 
 CREATE TABLE posts (
@@ -20,9 +19,11 @@ CREATE TABLE posts (
 );
 
 CREATE TABLE followers(
- follower_id INTEGER NOT NULL,
- target_id INTEGER NOT NULL,
- CONSTRAINT followers_pkey PRIMARY KEY (follower_id, target_id)
+  follower_id INTEGER NOT NULL,
+  target_id INTEGER NOT NULL,
+  CONSTRAINT followers_pkey PRIMARY KEY (follower_id, target_id),
+  CONSTRAINT followers_users_follower_fkey FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+  CONSTRAINT followers_users_target_fkey FOREIGN KEY (target_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 COMMIT;

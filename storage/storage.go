@@ -4,13 +4,14 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
+	"path"
+	"runtime"
+
 	"github.com/golang-migrate/migrate"
 	migratepg "github.com/golang-migrate/migrate/database/postgres"
 	_ "github.com/golang-migrate/migrate/source/file"
 	_ "github.com/lib/pq"
-	"log"
-	"path"
-	"runtime"
 )
 
 var (
@@ -90,7 +91,7 @@ func updateSchema(db *sql.DB, dbType string) error {
 	err = m.Up()
 	if err == migrate.ErrNoChange {
 		log.Println("No changes to the database schema have been made")
-		err = nil
+		return nil
 	}
 	return err
 }
