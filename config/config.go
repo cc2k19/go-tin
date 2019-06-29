@@ -41,7 +41,7 @@ func DefaultSettings() *Settings {
 	}
 }
 
-// DefaultConfigFile holds the default SM config file properties
+// DefaultConfigFile holds the default config file properties
 func DefaultConfigFile() ConfigFile {
 	return ConfigFile{
 		Name:     "application",
