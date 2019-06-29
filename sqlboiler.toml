@@ -1,0 +1,9 @@
+[psql]
+  dbname = "postgres"
+  host   = "localhost"
+  port   = 1234
+  user   = "postgres"
+  pass   = "postgres"
+  schema = "public"
+  sslmode = "disable"
+  blacklist = ["schema_migrations"]
