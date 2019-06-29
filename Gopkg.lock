@@ -10,14 +10,6 @@
   version = "v1.3.3"
 
 [[projects]]
-  branch = "dev"
-  digest = "1:98568987d2c9fd402fe1dfe86dd8344f3562c03d3d1686cb37878657366db971"
-  name = "github.com/cc2k19/go-tin"
-  packages = ["server"]
-  pruneopts = "UT"
-  revision = "6ec0f0dbb1e42530c68762d8485197fcdf9add20"
-
-[[projects]]
   digest = "1:abeb38ade3f32a92943e5be54f55ed6d6e3b6602761d74b4aab4c9dd45c18abd"
   name = "github.com/fsnotify/fsnotify"
   packages = ["."]
@@ -38,6 +30,8 @@
   pruneopts = "UT"
   revision = "93d53a5ae84d81945eedadfe8f6865530d61d51c"
   version = "v3.5.1"
+
+[[projects]]
   digest = "1:c79fb010be38a59d657c48c6ba1d003a8aa651fa56b579d959d74573b7dff8e1"
   name = "github.com/gorilla/context"
   packages = ["."]
@@ -293,16 +287,12 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-<<<<<<< HEAD
     "github.com/DATA-DOG/go-sqlmock",
-    "github.com/cc2k19/go-tin/server",
     "github.com/golang-migrate/migrate",
     "github.com/golang-migrate/migrate/database/postgres",
     "github.com/golang-migrate/migrate/source/file",
-    "github.com/lib/pq",
-=======
     "github.com/gorilla/mux",
->>>>>>> Server listening and gracefull shutdown
+    "github.com/lib/pq",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/spf13/viper",
