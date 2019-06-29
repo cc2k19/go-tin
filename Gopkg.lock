@@ -18,6 +18,14 @@
   version = "v1.4.7"
 
 [[projects]]
+  digest = "1:bed9d72d596f94e65fff37f4d6c01398074a6bb1c3f3ceff963516bd01db6ff5"
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:d11309893a17c6f3d487c09d5be0cb6c023d05453558a6afbb17d44af2fded3b"
   name = "github.com/golang-migrate/migrate"
   packages = [
@@ -79,6 +87,14 @@
   pruneopts = "UT"
   revision = "a30252cb686a21eb2d0b98132633053ec2f7f1e5"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:c4eaf5c51409d14be6b1010ac6ee6c0f54df8254e508fd3490700a22c7eadc16"
+  name = "github.com/kat-co/vala"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "bfe9b50e828ad56312e486cbf4165ff1ac3a9bae"
+  version = "v1"
 
 [[projects]]
   branch = "master"
@@ -165,6 +181,14 @@
   version = "v1.4.0"
 
 [[projects]]
+  digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+  name = "github.com/pkg/errors"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
+
+[[projects]]
   digest = "1:bb495ec276ab82d3dd08504bbc0594a65de8c3b22c6f2aaa92d05b73fbf3a82e"
   name = "github.com/spf13/afero"
   packages = [
@@ -206,6 +230,43 @@
   pruneopts = "UT"
   revision = "b5e8006cbee93ec955a89ab31e0e3ce3204f3736"
   version = "v1.0.2"
+
+[[projects]]
+  branch = "master"
+  digest = "1:dd70bca92c5f88f5d6a098eaa570f604d52a460d82b81e1418c9559f6a742612"
+  name = "github.com/volatiletech/inflect"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "e7201282ae8da26cd97aed2e516f75c0bd91bb93"
+
+[[projects]]
+  digest = "1:218426218c1e963d3b3aac87793033ab444626943452449c830cc9c92004b1ac"
+  name = "github.com/volatiletech/null"
+  packages = [
+    ".",
+    "convert",
+  ]
+  pruneopts = "UT"
+  revision = "0681ee3b5e046ac8bfbbd3999e79d3905e96972f"
+  version = "v8.0.0"
+
+[[projects]]
+  digest = "1:f55ddc2146f88b303642fc9f1bd44984fce11aa8d111b4ea32047a4f0689a548"
+  name = "github.com/volatiletech/sqlboiler"
+  packages = [
+    "boil",
+    "drivers",
+    "drivers/sqlboiler-psql/driver",
+    "importers",
+    "queries",
+    "queries/qm",
+    "queries/qmhelper",
+    "randomize",
+    "strmangle",
+  ]
+  pruneopts = "UT"
+  revision = "9c8f3844068160cdfa32077e2fec29fbf4a0b237"
+  version = "v3.4.0"
 
 [[projects]]
   branch = "master"
@@ -291,11 +352,22 @@
     "github.com/golang-migrate/migrate",
     "github.com/golang-migrate/migrate/database/postgres",
     "github.com/golang-migrate/migrate/source/file",
+    "github.com/kat-co/vala",
     "github.com/gorilla/mux",
     "github.com/lib/pq",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
+    "github.com/pkg/errors",
     "github.com/spf13/viper",
+    "github.com/volatiletech/null",
+    "github.com/volatiletech/sqlboiler/boil",
+    "github.com/volatiletech/sqlboiler/drivers",
+    "github.com/volatiletech/sqlboiler/drivers/sqlboiler-psql/driver",
+    "github.com/volatiletech/sqlboiler/queries",
+    "github.com/volatiletech/sqlboiler/queries/qm",
+    "github.com/volatiletech/sqlboiler/queries/qmhelper",
+    "github.com/volatiletech/sqlboiler/randomize",
+    "github.com/volatiletech/sqlboiler/strmangle",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1
