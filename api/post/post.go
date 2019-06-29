@@ -16,14 +16,16 @@ func (c *controller) Routes() []web.Route {
 				Method: http.MethodPost,
 				Path:   web.PostsURL,
 			},
-			Handler: c.add,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.add,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
 				Path:   web.PostsURL,
 			},
-			Handler: c.get,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.get,
 		},
 	}
 }

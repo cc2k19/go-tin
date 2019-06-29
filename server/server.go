@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"fmt"
+	"github.com/cc2k19/go-tin/api"
 	"github.com/cc2k19/go-tin/web"
 	"github.com/gorilla/mux"
 	"log"
@@ -45,6 +46,7 @@ func New(config *Settings, api *web.API) *Server {
 	for _, controller := range api.Controllers {
 		routes := controller.Routes()
 		for _, route := range routes {
+			route.Handler = attachAuthenticationFilter(route.Handler, route.AuthType)
 			router.HandleFunc(route.Endpoint.Path, route.Handler).Methods(route.Endpoint.Method)
 		}
 	}
@@ -91,5 +93,21 @@ func gracefulShutdown(ctx context.Context, server *http.Server, wg *sync.WaitGro
 		}
 	} else {
 		log.Println("Server stopped")
+	}
+}
+
+func attachAuthenticationFilter(h http.HandlerFunc, authType web.AuthType) http.HandlerFunc {
+	switch authType {
+	case web.BasicAuthentication:
+		return func(rw http.ResponseWriter, r *http.Request) {
+			err := api.AuthenticateBasic(r)
+			if err != nil {
+				api.WriteResponse(rw, http.StatusUnauthorized, api.ErrorResponse{Error: err.Error()})
+			} else {
+				h(rw, r)
+			}
+		}
+	default:
+		return h
 	}
 }

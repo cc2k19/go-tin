@@ -16,42 +16,48 @@ func (c *controller) Routes() []web.Route {
 				Method: http.MethodPost,
 				Path:   web.UsersURL,
 			},
-			Handler: c.add,
+			AuthType: web.NoAuthentication,
+			Handler:  c.add,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
 				Path:   web.UsersURL + "/{username}",
 			},
-			Handler: c.getByUsername,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.getByUsername,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodPost,
-				Path: web.FollowURL + "/{username}",
+				Path:   web.FollowURL + "/{username}",
 			},
-			Handler: c.follow,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.follow,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodDelete,
-				Path: web.FollowURL + "/{username}",
+				Path:   web.FollowURL + "/{username}",
 			},
-			Handler: c.unfollow,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.unfollow,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
-				Path: web.FollowersURL,
+				Path:   web.FollowersURL,
 			},
-			Handler: c.getFollowers,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.getFollowers,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
-				Path: web.FollowingURL,
+				Path:   web.FollowingURL,
 			},
-			Handler: c.getFollowing,
+			AuthType: web.BasicAuthentication,
+			Handler:  c.getFollowing,
 		},
 	}
 }
