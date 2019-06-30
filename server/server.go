@@ -42,6 +42,17 @@ type Server struct {
 func New(config *Settings, api *web.API) *Server {
 	router := mux.NewRouter().StrictSlash(true)
 
+	for _, controller := range api.Controllers {
+		for _, route := range controller.Routes() {
+			for _, filter := range api.Filters {
+				if matches(filter, route.Endpoint) {
+					route.Handler = attachFilter(route.Handler, filter)
+				}
+			}
+			router.HandleFunc(route.Endpoint.Path, route.Handler).Methods(route.Endpoint.Method)
+		}
+	}
+
 	return &Server{
 		Router: router,
 		Config: config,
@@ -84,5 +95,26 @@ func gracefulShutdown(ctx context.Context, server *http.Server, wg *sync.WaitGro
 		}
 	} else {
 		log.Println("Server stopped")
+	}
+}
+
+func matches(filter web.Filter, endpoint web.Endpoint) bool {
+	for _, v := range filter.MatchingEndpoints() {
+		if v == endpoint {
+			return true
+		}
+	}
+	return false
+}
+
+func attachFilter(h http.HandlerFunc, filter web.Filter) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		status, err := filter.Filter(r)
+		if err != nil {
+			web.WriteResponse(rw, status, web.ErrorResponse{Error: err.Error()})
+			_ = r.Body.Close()
+		} else {
+			h(rw, r)
+		}
 	}
 }

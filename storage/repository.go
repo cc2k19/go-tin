@@ -15,20 +15,33 @@ import (
 	"github.com/cc2k19/go-tin/models"
 )
 
+// Repository wraps the storage and provides domain specific functions to interact with the storage
 type Repository struct {
 	storage Storage
 }
 
+// NewRepository returns new repository for a given storage
 func NewRepository(storage Storage) *Repository {
 	return &Repository{
 		storage: storage,
 	}
 }
 
+// AssertCredentials checks if given username and password are the same as persisted into the database
+func (r *Repository) AssertCredentials(ctx context.Context, username, password []byte) error {
+	user, err := r.getUserByUsername(ctx, string(username))
+	if err != nil {
+		return err
+	}
+
+	return bcrypt.CompareHashAndPassword([]byte(user.Password), password)
+}
+
+// AddUser adds user given as byte slice into the database
 func (r *Repository) AddUser(ctx context.Context, user []byte) error {
 	u := models.User{}
 	if err := json.Unmarshal(user, &u); err != nil {
-		return fmt.Errorf("could not parse json into user struct")
+		return fmt.Errorf("could not parse json into user struct: %s", err)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
@@ -41,15 +54,7 @@ func (r *Repository) AddUser(ctx context.Context, user []byte) error {
 	return u.Insert(ctx, r.storage.Get(), boil.Infer())
 }
 
-func (r *Repository) AssertCredentials(ctx context.Context, username, password []byte) error {
-	user, err := r.getUserByUsername(ctx, string(username))
-	if err != nil {
-		return err
-	}
-
-	return bcrypt.CompareHashAndPassword([]byte(user.Password), password)
-}
-
+// GetUserByUsername returns user entity for a given user identified by username
 func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	user, err := r.getUserByUsername(ctx, username)
 	if err != nil {
@@ -59,6 +64,7 @@ func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*m
 	return user, nil
 }
 
+// AddFollowRecord adds a follow relation between two users of type `follower follows target`
 func (r *Repository) AddFollowRecord(ctx context.Context, follower string, target string) error {
 	users, err := r.getFollowerTargetPair(ctx, follower, target)
 	if err != nil {
@@ -70,6 +76,7 @@ func (r *Repository) AddFollowRecord(ctx context.Context, follower string, targe
 	return targetUser.AddFollowerUsers(ctx, r.storage.Get(), false, followerUser)
 }
 
+// DeleteFollowRecord deletes a follow relation between two users
 func (r *Repository) DeleteFollowRecord(ctx context.Context, follower string, target string) error {
 	users, err := r.getFollowerTargetPair(ctx, follower, target)
 	if err != nil {
@@ -78,10 +85,11 @@ func (r *Repository) DeleteFollowRecord(ctx context.Context, follower string, ta
 
 	followerUser, targetUser := users[0], users[1]
 
-	return targetUser.RemoveTargetUsers(ctx, r.storage.Get(), followerUser)
+	return followerUser.RemoveTargetUsers(ctx, r.storage.Get(), targetUser)
 }
 
-func (r *Repository) GetFollowers(ctx context.Context, username, funcType string) (models.UserSlice, error) {
+// GetFollowers returns all the followers of a given user
+func (r *Repository) GetFollowers(ctx context.Context, username string) (models.UserSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Followers")
 	if err != nil {
 		return nil, err
@@ -90,6 +98,7 @@ func (r *Repository) GetFollowers(ctx context.Context, username, funcType string
 	return users, nil
 }
 
+// GetFollowing returns all the users who follow a given user
 func (r *Repository) GetFollowing(ctx context.Context, username string) (models.UserSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Targets")
 	if err != nil {
@@ -99,6 +108,7 @@ func (r *Repository) GetFollowing(ctx context.Context, username string) (models.
 	return users, nil
 }
 
+// AddPost adds a post to a given users profile
 func (r *Repository) AddPost(ctx context.Context, username string, post []byte) error {
 	p := models.Post{}
 	if err := json.Unmarshal(post, &p); err != nil {
@@ -117,18 +127,23 @@ func (r *Repository) AddPost(ctx context.Context, username string, post []byte) 
 	return p.Insert(ctx, r.storage.Get(), boil.Infer())
 }
 
+// GetTargetsPosts returns all the posts which a given user can see
 func (r *Repository) GetTargetsPosts(ctx context.Context, username string) (models.PostSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Targets")
 	if err != nil {
 		return nil, err
 	}
 
-	ids := make([]int, len(users))
+	if users == nil {
+		return nil, fmt.Errorf("current user does not follow anyone")
+	}
+
+	ids := make([]interface{}, 0, len(users))
 	for _, u := range users {
 		ids = append(ids, u.ID)
 	}
 
-	return models.Posts(qm.WhereIn("user_id in ?", ids)).All(ctx, r.storage.Get())
+	return models.Posts(qm.WhereIn("user_id in ?", ids...)).All(ctx, r.storage.Get())
 }
 
 func (r *Repository) getOneToMany(ctx context.Context, username, relation string) (models.UserSlice, error) {
@@ -137,14 +152,15 @@ func (r *Repository) getOneToMany(ctx context.Context, username, relation string
 		return nil, err
 	}
 
+	var emptyQueryMods []qm.QueryMod
 	var users models.UserSlice
 	var e error
 
 	switch relation {
-	case "Followers":
-		users, e = user.FollowerUsers(nil).All(ctx, r.storage.Get())
 	case "Targets":
-		users, e = user.TargetUsers(nil).All(ctx, r.storage.Get())
+		users, e = user.TargetUsers(emptyQueryMods...).All(ctx, r.storage.Get())
+	case "Followers":
+		users, e = user.FollowerUsers(emptyQueryMods...).All(ctx, r.storage.Get())
 	}
 
 	if e != nil {
