@@ -1,42 +1,46 @@
 package user
 
 import (
-	"encoding/base64"
-	"github.com/cc2k19/go-tin/storage"
-	"github.com/cc2k19/go-tin/web"
+	"context"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/cc2k19/go-tin/models"
+
+	"github.com/cc2k19/go-tin/storage"
+	"github.com/cc2k19/go-tin/web"
 )
 
 type controller struct {
 	repository *storage.Repository
+	ce         web.CredentialsExtractor
 }
 
-func (c *controller) add(wr http.ResponseWriter, r *http.Request) {
+func (c *controller) add(rw http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	ctx := r.Context()
 
 	body, err := ioutil.ReadAll(r.Body)
-
 	if err != nil {
 		log.Printf("Could not extract body: %s\n", err)
-		wr.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
 	err = c.repository.AddUser(ctx, body)
 	if err != nil {
 		log.Printf("Persisting user failed: %s\n", err)
-		wr.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	wr.WriteHeader(http.StatusCreated)
+
+	rw.WriteHeader(http.StatusCreated)
 }
 
-func (c *controller) getByUsername(wr http.ResponseWriter, r *http.Request) {
+func (c *controller) getByUsername(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	username := strings.TrimPrefix(r.URL.Path, web.UsersURL+"/")
@@ -44,103 +48,74 @@ func (c *controller) getByUsername(wr http.ResponseWriter, r *http.Request) {
 	user, err := c.repository.GetUserByUsername(ctx, username)
 	if err != nil {
 		log.Printf("Get user with username %s failed: %s", username, err)
-		wr.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	web.WriteResponse(wr, http.StatusOK, user)
+	web.WriteResponse(rw, http.StatusOK, user)
 }
 
-func (c *controller) follow(wr http.ResponseWriter, r *http.Request) {
+func (c *controller) follow(rw http.ResponseWriter, r *http.Request) {
+	err := c.executeRelation(r, c.repository.AddFollowRecord)
+	if err != nil {
+		log.Printf("Persisting unfollow relation failed: %s\n", err)
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rw.WriteHeader(http.StatusCreated)
+}
+
+func (c *controller) unfollow(rw http.ResponseWriter, r *http.Request) {
+	err := c.executeRelation(r, c.repository.DeleteFollowRecord)
+	if err != nil {
+		log.Printf("Persisting unfollow relation failed: %s\n", err)
+		rw.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	rw.WriteHeader(http.StatusNoContent)
+}
+
+func (c *controller) executeRelation(r *http.Request, f func(ctx context.Context, follower string, target string) error) error {
 	defer r.Body.Close()
 
 	ctx := r.Context()
 
-	auth := r.Header.Get("Authorization")
-	decodedCredentials, err := base64.StdEncoding.DecodeString(auth[6:])
+	username, err := c.ce.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
-		wr.WriteHeader(http.StatusBadRequest)
-		return
+		return err
 	}
 
-	username := strings.Split(string(decodedCredentials), ":")[0]
 	target := strings.TrimPrefix(r.URL.Path, web.FollowURL+"/")
 
-	err = c.repository.AddFollowRecord(ctx, username, target)
-	if err != nil {
-		log.Printf("Persisting follow relation failed: %s\n", err)
-		wr.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	wr.WriteHeader(http.StatusCreated)
+	return f(ctx, username, target)
 }
 
-func (c *controller) unfollow(wr http.ResponseWriter, r *http.Request) {
-	defer r.Body.Close()
-
-	ctx := r.Context()
-
-	auth := r.Header.Get("Authorization")
-	decodedCredentials, err := base64.StdEncoding.DecodeString(auth[6:])
-	if err != nil {
-		log.Printf("Authorization decode error: %s", err)
-		wr.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	username := strings.Split(string(decodedCredentials), ":")[0]
-	target := strings.TrimPrefix(r.URL.Path, web.FollowURL+"/")
-
-	err = c.repository.DeleteFollowRecord(ctx, username, target)
-	if err != nil {
-		log.Printf("Persisting follow relation failed: %s\n", err)
-		wr.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	wr.WriteHeader(http.StatusOK)
+func (c *controller) getFollowers(rw http.ResponseWriter, r *http.Request) {
+	c.getInteraction(rw, r, c.repository.GetFollowers)
 }
 
-func (c *controller) getFollowers(wr http.ResponseWriter, r *http.Request) {
+func (c *controller) getFollowing(rw http.ResponseWriter, r *http.Request) {
+	c.getInteraction(rw, r, c.repository.GetFollowing)
+}
+
+func (c *controller) getInteraction(rw http.ResponseWriter, r *http.Request, f func(ctx context.Context, username string) (models.UserSlice, error)) {
 	ctx := r.Context()
 
-	auth := r.Header.Get("Authorization")
-	decodedCredentials, err := base64.StdEncoding.DecodeString(auth[6:])
+	username, err := c.ce.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
-		wr.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	username := strings.Split(string(decodedCredentials), ":")[0]
-	followers, err := c.repository.GetFollowers(ctx, username)
+	followers, err := f(ctx, username)
 	if err != nil {
 		log.Printf("Get followers for user %s failed: %s", username, err)
-		wr.WriteHeader(http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
 	}
 
-	web.WriteResponse(wr, http.StatusOK, followers)
-}
-
-func (c *controller) getFollowing(wr http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-
-	auth := r.Header.Get("Authorization")
-	decodedCredentials, err := base64.StdEncoding.DecodeString(auth[6:])
-	if err != nil {
-		log.Printf("Authorization decode error: %s", err)
-		wr.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	username := strings.Split(string(decodedCredentials), ":")[0]
-	followers, err := c.repository.GetFollowing(ctx, username)
-	if err != nil {
-		log.Printf("Get followers for user %s failed: %s", username, err)
-		wr.WriteHeader(http.StatusNotFound)
-	}
-
-	web.WriteResponse(wr, http.StatusOK, followers)
+	web.WriteResponse(rw, http.StatusOK, followers)
 }

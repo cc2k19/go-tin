@@ -1,14 +1,16 @@
 package post
 
 import (
+	"net/http"
+
 	"github.com/cc2k19/go-tin/storage"
 	"github.com/cc2k19/go-tin/web"
-	"net/http"
 )
 
-func NewPostsController(repository *storage.Repository) *controller {
+func NewPostsController(repository *storage.Repository, extractor web.CredentialsExtractor) *controller {
 	return &controller{
 		repository: repository,
+		ce:         extractor,
 	}
 }
 

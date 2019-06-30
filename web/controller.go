@@ -1,7 +1,10 @@
 package web
 
 import (
+	"encoding/base64"
+	"log"
 	"net/http"
+	"strings"
 )
 
 // Controller is an entity that wraps a set of HTTP Routes
@@ -33,4 +36,25 @@ type Route struct {
 type Endpoint struct {
 	Method string
 	Path   string
+}
+
+type CredentialsExtractor interface {
+	Extract(*http.Request) (string, error)
+}
+
+type FuncCredentialsExtractor func(*http.Request) (string, error)
+
+func (fce FuncCredentialsExtractor) Extract(r *http.Request) (string, error) {
+	return fce(r)
+}
+
+func BasicCredentialsExtract(r *http.Request) (string, error) {
+	auth := r.Header.Get("Authorization")
+	decodedCredentials, err := base64.StdEncoding.DecodeString(auth[6:])
+	if err != nil {
+		log.Printf("Authorization decode error: %s", err)
+		return "", err
+	}
+
+	return strings.Split(string(decodedCredentials), ":")[0], nil
 }

@@ -123,6 +123,10 @@ func (r *Repository) GetTargetsPosts(ctx context.Context, username string) (mode
 		return nil, err
 	}
 
+	if users == nil {
+		return nil, fmt.Errorf("current user does not follow anyone")
+	}
+
 	ids := make([]interface{}, 0, len(users))
 	for _, u := range users {
 		ids = append(ids, u.ID)
