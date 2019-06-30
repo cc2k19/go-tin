@@ -26,7 +26,7 @@ func (c *controller) add(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	username, err := c.credentialsExtractor.Extract(r)
+	username, _, err := c.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
 		rw.WriteHeader(http.StatusBadRequest)
@@ -45,17 +45,17 @@ func (c *controller) add(rw http.ResponseWriter, r *http.Request) {
 func (c *controller) get(rw http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	username, err := c.credentialsExtractor.Extract(r)
+	username, _, err := c.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
-		rw.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 
 	posts, err := c.repository.GetTargetsPosts(ctx, username)
 	if err != nil {
 		log.Printf("Get posts for %s failed: %s\n", username, err)
-		rw.WriteHeader(http.StatusBadRequest)
+		rw.WriteHeader(http.StatusNotFound)
 		return
 	}
 	web.WriteResponse(rw, http.StatusOK, posts)

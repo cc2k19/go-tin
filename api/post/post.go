@@ -7,6 +7,7 @@ import (
 	"github.com/cc2k19/go-tin/web"
 )
 
+// NewPostsController returns new post controller for given repository and mechanism for credentials extracting from request
 func NewPostsController(repository *storage.Repository, extractor web.CredentialsExtractor) *controller {
 	return &controller{
 		repository:           repository,
@@ -14,6 +15,7 @@ func NewPostsController(repository *storage.Repository, extractor web.Credential
 	}
 }
 
+// Routes returns the set of routes for this controller
 func (c *controller) Routes() []web.Route {
 	return []web.Route{
 		{
@@ -21,16 +23,14 @@ func (c *controller) Routes() []web.Route {
 				Method: http.MethodPost,
 				Path:   web.PostsURL,
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.add,
+			Handler: c.add,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
 				Path:   web.PostsURL,
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.get,
+			Handler: c.get,
 		},
 	}
 }

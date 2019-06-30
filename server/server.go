@@ -112,7 +112,7 @@ func attachFilter(h http.HandlerFunc, filter web.Filter) http.HandlerFunc {
 		status, err := filter.Filter(r)
 		if err != nil {
 			web.WriteResponse(rw, status, web.ErrorResponse{Error: err.Error()})
-			r.Body.Close()
+			_ = r.Body.Close()
 		} else {
 			h(rw, r)
 		}

@@ -26,7 +26,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := cfg.Validate(); err != nil {
+	if err = cfg.Validate(); err != nil {
 		panic(err)
 	}
 

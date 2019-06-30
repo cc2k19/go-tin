@@ -82,7 +82,7 @@ func (c *controller) executeRelation(r *http.Request, f func(ctx context.Context
 
 	ctx := r.Context()
 
-	username, err := c.credentialsExtractor.Extract(r)
+	username, _, err := c.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
 		return err
@@ -104,7 +104,7 @@ func (c *controller) getFollowing(rw http.ResponseWriter, r *http.Request) {
 func (c *controller) getInteraction(rw http.ResponseWriter, r *http.Request, f func(ctx context.Context, username string) (models.UserSlice, error)) {
 	ctx := r.Context()
 
-	username, err := c.credentialsExtractor.Extract(r)
+	username, _, err := c.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
 		rw.WriteHeader(http.StatusNotFound)
@@ -115,6 +115,12 @@ func (c *controller) getInteraction(rw http.ResponseWriter, r *http.Request, f f
 	if err != nil {
 		log.Printf("Get followers for user %s failed: %s", username, err)
 		rw.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if followers == nil {
+		rw.WriteHeader(http.StatusNotFound)
+		return
 	}
 
 	web.WriteResponse(rw, http.StatusOK, followers)

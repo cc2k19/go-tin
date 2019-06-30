@@ -7,6 +7,7 @@ import (
 	"github.com/cc2k19/go-tin/web"
 )
 
+// NewUsersController returns new user controller for given repository and mechanism for credentials extracting from request
 func NewUsersController(repository *storage.Repository, extractor web.CredentialsExtractor) *controller {
 	return &controller{
 		repository:           repository,
@@ -14,6 +15,7 @@ func NewUsersController(repository *storage.Repository, extractor web.Credential
 	}
 }
 
+// Routes returns the set of routes for this controller
 func (c *controller) Routes() []web.Route {
 	return []web.Route{
 		{
@@ -21,48 +23,42 @@ func (c *controller) Routes() []web.Route {
 				Method: http.MethodPost,
 				Path:   web.UsersURL,
 			},
-			AuthType: web.NoAuthentication,
-			Handler:  c.add,
+			Handler: c.add,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
 				Path:   web.UsersURL + "/{username}",
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.getByUsername,
+			Handler: c.getByUsername,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodPut,
 				Path:   web.FollowURL + "/{username}",
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.follow,
+			Handler: c.follow,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodDelete,
 				Path:   web.FollowURL + "/{username}",
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.unfollow,
+			Handler: c.unfollow,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
 				Path:   web.FollowersURL,
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.getFollowers,
+			Handler: c.getFollowers,
 		},
 		{
 			Endpoint: web.Endpoint{
 				Method: http.MethodGet,
 				Path:   web.FollowingURL,
 			},
-			AuthType: web.BasicAuthentication,
-			Handler:  c.getFollowing,
+			Handler: c.getFollowing,
 		},
 	}
 }

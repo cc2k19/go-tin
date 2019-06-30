@@ -1,46 +1,40 @@
 package filters
 
 import (
-	"encoding/base64"
 	"fmt"
 	"github.com/cc2k19/go-tin/storage"
 	"github.com/cc2k19/go-tin/web"
 	"log"
 	"net/http"
-	"strings"
 )
 
+// BasicAuthenticationFilter provides security with basic authentication mechanism
 type BasicAuthenticationFilter struct {
-	repository *storage.Repository
+	repository           *storage.Repository
+	credentialsExtractor web.CredentialsExtractor
 }
 
+// NewBasicAuthenticationFilter returns new basic auth filter for given repository
 func NewBasicAuthenticationFilter(repository *storage.Repository) *BasicAuthenticationFilter {
 	return &BasicAuthenticationFilter{
-		repository: repository,
+		repository:           repository,
+		credentialsExtractor: web.CredentialsExtractorFunc(web.BasicCredentialsExtractor),
 	}
 }
 
+// Filter filters http request on some conditions
 func (ba *BasicAuthenticationFilter) Filter(r *http.Request) (int, error) {
 	authError := fmt.Errorf("authentication failed")
 
 	ctx := r.Context()
 
-	auth := r.Header.Get("Authorization")
-
-	if !strings.HasPrefix(auth, "Basic ") {
-		log.Println("Invalid authorization header")
-		return http.StatusUnauthorized, authError
-	}
-
-	decodedCredentials, err := base64.StdEncoding.DecodeString(auth[6:])
+	username, password, err := ba.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
 		return http.StatusUnauthorized, authError
 	}
 
-	credentials := strings.Split(string(decodedCredentials), ":")
-
-	err = ba.repository.AssertCredentials(ctx, []byte(credentials[0]), []byte(credentials[1]))
+	err = ba.repository.AssertCredentials(ctx, []byte(username), []byte(password))
 	if err != nil {
 		log.Printf("credentials missmatch: %s", err)
 		return http.StatusUnauthorized, authError
@@ -49,6 +43,7 @@ func (ba *BasicAuthenticationFilter) Filter(r *http.Request) (int, error) {
 	return http.StatusOK, nil
 }
 
+// MatchingEndpoints returns all the endpoints that the filter should be attached before.
 func (ba *BasicAuthenticationFilter) MatchingEndpoints() []web.Endpoint {
 	return []web.Endpoint{
 		{
