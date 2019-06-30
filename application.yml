@@ -2,5 +2,5 @@ server:
   port: 8080
 storage:
   type: postgres
-  uri: postgres://postgres:postgres@localhost:1234/postgres
+  uri: postgres://postgres:postgres@localhost:5432/postgres
   skip_ssl_validation: true

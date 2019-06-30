@@ -1,7 +1,7 @@
 [psql]
   dbname = "postgres"
   host   = "localhost"
-  port   = 1234
+  port   = 5432
   user   = "postgres"
   pass   = "postgres"
   schema = "public"
