@@ -9,8 +9,8 @@ import (
 
 func NewPostsController(repository *storage.Repository, extractor web.CredentialsExtractor) *controller {
 	return &controller{
-		repository: repository,
-		ce:         extractor,
+		repository:           repository,
+		credentialsExtractor: extractor,
 	}
 }
 

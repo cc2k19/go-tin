@@ -14,8 +14,8 @@ import (
 )
 
 type controller struct {
-	repository *storage.Repository
-	ce         web.CredentialsExtractor
+	repository           *storage.Repository
+	credentialsExtractor web.CredentialsExtractor
 }
 
 func (c *controller) add(rw http.ResponseWriter, r *http.Request) {
@@ -82,7 +82,7 @@ func (c *controller) executeRelation(r *http.Request, f func(ctx context.Context
 
 	ctx := r.Context()
 
-	username, err := c.ce.Extract(r)
+	username, err := c.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
 		return err
@@ -104,7 +104,7 @@ func (c *controller) getFollowing(rw http.ResponseWriter, r *http.Request) {
 func (c *controller) getInteraction(rw http.ResponseWriter, r *http.Request, f func(ctx context.Context, username string) (models.UserSlice, error)) {
 	ctx := r.Context()
 
-	username, err := c.ce.Extract(r)
+	username, err := c.credentialsExtractor.Extract(r)
 	if err != nil {
 		log.Printf("Authorization decode error: %s", err)
 		rw.WriteHeader(http.StatusNotFound)
