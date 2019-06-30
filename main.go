@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/cc2k19/go-tin/api"
 	"log"
 	"os"
 	"os/signal"
@@ -10,7 +11,6 @@ import (
 	"github.com/cc2k19/go-tin/config"
 	"github.com/cc2k19/go-tin/server"
 	"github.com/cc2k19/go-tin/storage"
-	"github.com/cc2k19/go-tin/web"
 )
 
 func main() {
@@ -26,17 +26,19 @@ func main() {
 		panic(err)
 	}
 
-	if err := cfg.Validate(); err != nil {
+	if err = cfg.Validate(); err != nil {
 		panic(err)
 	}
 
-	storage, err := storage.New(cfg.Storage)
+	db, err := storage.New(cfg.Storage)
 	if err != nil {
 		panic(err)
 	}
-	defer storage.Close()
+	defer db.Close()
 
-	api := &web.API{}
+	repository := storage.NewRepository(db)
+
+	api := api.New(repository)
 
 	server := server.New(cfg.Server, api)
 	server.Run(ctx, wg)

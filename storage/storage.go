@@ -26,6 +26,7 @@ type Settings struct {
 	SkipSSLValidation bool   `mapstructure:"skip_ssl_validation" description:"whether to skip ssl verification when connecting to the storage"`
 }
 
+// DefaultSettings returns default settings for the storage
 func DefaultSettings() *Settings {
 	return &Settings{
 		Type:              "",
@@ -45,6 +46,7 @@ func (s *Settings) Validate() error {
 	return nil
 }
 
+// Storage interface represents a Transactional Database
 type Storage interface {
 	Get() *sql.DB
 	Transaction(context context.Context, operation func(context context.Context, tx *sql.Tx) error) error
