@@ -1,4 +1,8 @@
 # go-tin
+[![Build Status](https://travis-ci.org/cc2k19/go-tin.svg?branch=master)](https://travis-ci.org/cc2k19/go-tin)
+[![Coverage Status](https://coveralls.io/repos/github/cc2k19/go-tin/badge.svg?branch=master)](https://coveralls.io/github/cc2k19/go-tin?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/cc2k19/go-tin)](https://goreportcard.com/report/github.com/cc2k19/go-tin)
+[![GoDoc](https://godoc.org/github.com/cc2k19/go-tin?status.svg)](https://godoc.org/github.com/cc2k19/go-tin)
 [![Licence](https://img.shields.io/github/license/cc2k19/go-tin.svg?style=popout)](https://github.com/cc2k19/go-tin/blob/master/LICENSE)
 
 
