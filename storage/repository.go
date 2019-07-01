@@ -16,19 +16,33 @@ import (
 )
 
 // Repository wraps the storage and provides domain specific functions to interact with the storage
-type Repository struct {
+//go:generate counterfeiter . Repository
+type Repository interface {
+	AssertCredentials(ctx context.Context, username, password []byte) error
+	AddUser(ctx context.Context, user []byte) error
+	GetUserByUsername(ctx context.Context, username string) (*models.User, error)
+	AddFollowRecord(ctx context.Context, follower string, target string) error
+	DeleteFollowRecord(ctx context.Context, follower string, target string) error
+	GetFollowers(ctx context.Context, username string) (models.UserSlice, error)
+	GetFollowing(ctx context.Context, username string) (models.UserSlice, error)
+	AddPost(ctx context.Context, username string, post []byte) error
+	GetTargetsPosts(ctx context.Context, username string) (models.PostSlice, error)
+}
+
+// RepositoryImpl implements Repository in order to interact with storage
+type RepositoryImpl struct {
 	storage Storage
 }
 
 // NewRepository returns new repository for a given storage
-func NewRepository(storage Storage) *Repository {
-	return &Repository{
+func NewRepository(storage Storage) Repository {
+	return &RepositoryImpl{
 		storage: storage,
 	}
 }
 
 // AssertCredentials checks if given username and password are the same as persisted into the database
-func (r *Repository) AssertCredentials(ctx context.Context, username, password []byte) error {
+func (r *RepositoryImpl) AssertCredentials(ctx context.Context, username, password []byte) error {
 	user, err := r.getUserByUsername(ctx, string(username))
 	if err != nil {
 		return err
@@ -38,7 +52,7 @@ func (r *Repository) AssertCredentials(ctx context.Context, username, password [
 }
 
 // AddUser adds user given as byte slice into the database
-func (r *Repository) AddUser(ctx context.Context, user []byte) error {
+func (r *RepositoryImpl) AddUser(ctx context.Context, user []byte) error {
 	u := models.User{}
 	if err := json.Unmarshal(user, &u); err != nil {
 		return fmt.Errorf("could not parse json into user struct: %s", err)
@@ -55,7 +69,7 @@ func (r *Repository) AddUser(ctx context.Context, user []byte) error {
 }
 
 // GetUserByUsername returns user entity for a given user identified by username
-func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (r *RepositoryImpl) GetUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	user, err := r.getUserByUsername(ctx, username)
 	if err != nil {
 		return nil, err
@@ -65,7 +79,7 @@ func (r *Repository) GetUserByUsername(ctx context.Context, username string) (*m
 }
 
 // AddFollowRecord adds a follow relation between two users of type `follower follows target`
-func (r *Repository) AddFollowRecord(ctx context.Context, follower string, target string) error {
+func (r *RepositoryImpl) AddFollowRecord(ctx context.Context, follower string, target string) error {
 	users, err := r.getFollowerTargetPair(ctx, follower, target)
 	if err != nil {
 		return err
@@ -77,7 +91,7 @@ func (r *Repository) AddFollowRecord(ctx context.Context, follower string, targe
 }
 
 // DeleteFollowRecord deletes a follow relation between two users
-func (r *Repository) DeleteFollowRecord(ctx context.Context, follower string, target string) error {
+func (r *RepositoryImpl) DeleteFollowRecord(ctx context.Context, follower string, target string) error {
 	users, err := r.getFollowerTargetPair(ctx, follower, target)
 	if err != nil {
 		return err
@@ -89,7 +103,7 @@ func (r *Repository) DeleteFollowRecord(ctx context.Context, follower string, ta
 }
 
 // GetFollowers returns all the followers of a given user
-func (r *Repository) GetFollowers(ctx context.Context, username string) (models.UserSlice, error) {
+func (r *RepositoryImpl) GetFollowers(ctx context.Context, username string) (models.UserSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Followers")
 	if err != nil {
 		return nil, err
@@ -99,7 +113,7 @@ func (r *Repository) GetFollowers(ctx context.Context, username string) (models.
 }
 
 // GetFollowing returns all the users who follow a given user
-func (r *Repository) GetFollowing(ctx context.Context, username string) (models.UserSlice, error) {
+func (r *RepositoryImpl) GetFollowing(ctx context.Context, username string) (models.UserSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Targets")
 	if err != nil {
 		return nil, err
@@ -109,7 +123,7 @@ func (r *Repository) GetFollowing(ctx context.Context, username string) (models.
 }
 
 // AddPost adds a post to a given users profile
-func (r *Repository) AddPost(ctx context.Context, username string, post []byte) error {
+func (r *RepositoryImpl) AddPost(ctx context.Context, username string, post []byte) error {
 	p := models.Post{}
 	if err := json.Unmarshal(post, &p); err != nil {
 		return fmt.Errorf("could not parse json into user struct")
@@ -128,7 +142,7 @@ func (r *Repository) AddPost(ctx context.Context, username string, post []byte) 
 }
 
 // GetTargetsPosts returns all the posts which a given user can see
-func (r *Repository) GetTargetsPosts(ctx context.Context, username string) (models.PostSlice, error) {
+func (r *RepositoryImpl) GetTargetsPosts(ctx context.Context, username string) (models.PostSlice, error) {
 	users, err := r.getOneToMany(ctx, username, "Targets")
 	if err != nil {
 		return nil, err
@@ -146,7 +160,7 @@ func (r *Repository) GetTargetsPosts(ctx context.Context, username string) (mode
 	return models.Posts(qm.WhereIn("user_id in ?", ids...)).All(ctx, r.storage.Get())
 }
 
-func (r *Repository) getOneToMany(ctx context.Context, username, relation string) (models.UserSlice, error) {
+func (r *RepositoryImpl) getOneToMany(ctx context.Context, username, relation string) (models.UserSlice, error) {
 	user, err := r.getUserByUsername(ctx, username)
 	if err != nil {
 		return nil, err
@@ -170,7 +184,7 @@ func (r *Repository) getOneToMany(ctx context.Context, username, relation string
 	return users, nil
 }
 
-func (r *Repository) getUserByUsername(ctx context.Context, username string) (*models.User, error) {
+func (r *RepositoryImpl) getUserByUsername(ctx context.Context, username string) (*models.User, error) {
 	user, err := models.Users(qm.Where("username=?", username)).One(ctx, r.storage.Get())
 	if err != nil {
 		return nil, err
@@ -179,7 +193,7 @@ func (r *Repository) getUserByUsername(ctx context.Context, username string) (*m
 	return user, nil
 }
 
-func (r *Repository) getFollowerTargetPair(ctx context.Context, follower string, target string) ([]*models.User, error) {
+func (r *RepositoryImpl) getFollowerTargetPair(ctx context.Context, follower string, target string) ([]*models.User, error) {
 	targetUser, err := r.getUserByUsername(ctx, target)
 	if err != nil {
 		return nil, err

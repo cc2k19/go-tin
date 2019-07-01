@@ -8,7 +8,7 @@ import (
 )
 
 // NewUsersController returns new user controller for given repository and mechanism for credentials extracting from request
-func NewUsersController(repository *storage.Repository, extractor web.CredentialsExtractor) *controller {
+func NewUsersController(repository storage.Repository, extractor web.CredentialsExtractor) *controller {
 	return &controller{
 		repository:           repository,
 		credentialsExtractor: extractor,

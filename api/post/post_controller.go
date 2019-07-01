@@ -10,7 +10,7 @@ import (
 )
 
 type controller struct {
-	repository           *storage.Repository
+	repository           storage.Repository
 	credentialsExtractor web.CredentialsExtractor
 }
 

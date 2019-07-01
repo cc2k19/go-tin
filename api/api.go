@@ -9,7 +9,7 @@ import (
 )
 
 // New returns new web API with controllers and filters for given repository
-func New(repository *storage.Repository) *web.API {
+func New(repository storage.Repository) *web.API {
 	return &web.API{
 		Controllers: []web.Controller{
 			user.NewUsersController(repository, web.CredentialsExtractorFunc(web.BasicCredentialsExtractor)),
