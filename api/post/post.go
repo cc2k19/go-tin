@@ -8,7 +8,7 @@ import (
 )
 
 // NewPostsController returns new post controller for given repository and mechanism for credentials extracting from request
-func NewPostsController(repository *storage.Repository, extractor web.CredentialsExtractor) *controller {
+func NewPostsController(repository storage.Repository, extractor web.CredentialsExtractor) *controller {
 	return &controller{
 		repository:           repository,
 		credentialsExtractor: extractor,
