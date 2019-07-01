@@ -10,12 +10,12 @@ import (
 
 // BasicAuthenticationFilter provides security with basic authentication mechanism
 type BasicAuthenticationFilter struct {
-	repository           *storage.Repository
+	repository           storage.Repository
 	credentialsExtractor web.CredentialsExtractor
 }
 
 // NewBasicAuthenticationFilter returns new basic auth filter for given repository
-func NewBasicAuthenticationFilter(repository *storage.Repository) *BasicAuthenticationFilter {
+func NewBasicAuthenticationFilter(repository storage.Repository) *BasicAuthenticationFilter {
 	return &BasicAuthenticationFilter{
 		repository:           repository,
 		credentialsExtractor: web.CredentialsExtractorFunc(web.BasicCredentialsExtractor),
