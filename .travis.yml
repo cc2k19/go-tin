@@ -21,4 +21,4 @@ services:
 script:
   - migrate -source file://./storage/migrations -database "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable" up
   - go test ./... -cover
-  - goveralls -service=travis-ci
+  - goveralls -show -service=travis-ci
